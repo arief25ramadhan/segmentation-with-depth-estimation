@@ -11,6 +11,8 @@ depth = sorted(glob.glob('nyud/depth/*.png'))
 seg = sorted(glob.glob('nyud/masks/*.png'))
 images = sorted(glob.glob('nyud/rgb/*.png'))
 
+CMAP = np.load('cmap_nyud.npy')
+
 
 class HydranetDataset(Dataset):
 
