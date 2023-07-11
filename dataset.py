@@ -5,6 +5,13 @@ import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 
+import glob
+
+depth = sorted(glob.glob('nyud/depth/*.png'))
+seg = sorted(glob.glob('nyud/masks/*.png'))
+images = sorted(glob.glob('nyud/rgb/*.png'))
+
+
 class HydranetDataset(Dataset):
 
     def __init__(self, data_file, transform=None):

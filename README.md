@@ -81,4 +81,3 @@ Make sure to change the image_path and output_path in the inference_onnx.py scri
 ## Credit 
 
 This project is mainly for learning purposes and is heavily based on the tutorial from [Aladdin Person's Youtube channel](https://www.youtube.com/watch?v=IHq1t7NxS8k). The original code is available [here](https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/image_segmentation/semantic_segmentation_unet).
-
