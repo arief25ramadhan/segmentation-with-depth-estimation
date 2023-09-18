@@ -66,9 +66,15 @@ To perform an inference on a single image, run this command:
 python inference.py 
 ```
 
-Make sure to change the image_path and output_path in the inference.py script.
+Make sure to change the image_path and output_path in the inference.py script. Figure 2 is the example result of the inference.
 
-### 2.5. Speed Up Inference 
+<p align="center">
+  <img src="media/0ee135a3cccc_04.jpg" width="350" title="hover text">
+  <img src="media/masked_car_w.jpg" width="350" title="hover text">
+</p>
+
+
+<!-- ### 2.5. Speed Up Inference 
 
 We also convert the model to Onnx runtime to speed up the inference time. The onnx model is available in this path. To perform inference on onnx runtime run this command
 
@@ -76,7 +82,7 @@ We also convert the model to Onnx runtime to speed up the inference time. The on
 python inference_onnx.py 
 ```
 
-Make sure to change the image_path and output_path in the inference_onnx.py script.
+Make sure to change the image_path and output_path in the inference_onnx.py script. -->
 
 ## Credit 
 
