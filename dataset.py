@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 
 import glob
+import os
 
 depth = sorted(glob.glob('dataset/nyud/depth/*.png'))
 seg = sorted(glob.glob('dataset/nyud/masks/*.png'))
@@ -21,7 +22,7 @@ class HydranetDataset(Dataset):
         with open(data_file, "rb") as f:
             datalist = f.readlines()
         self.datalist = [x.decode("utf-8").strip("\n").split("\t") for x in datalist]
-        self.root_dir = "nyud"
+        self.root_dir = "dataset/nyud"
         self.transform = transform
         self.masks_names = ("segm", "depth")
 

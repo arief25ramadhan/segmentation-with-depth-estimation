@@ -1,0 +1,118 @@
+{
+    "AverageMeter": null,
+    "CRPBlock": null,
+    "DataLoader": null,
+    "HydranetDataset": null,
+    "InvHuberLoss": null,
+    "InvertedResidualBlock": null,
+    "MTLWRefineNet": null,
+    "MeanIoU": null,
+    "MobileNetv2": null,
+    "Normalise": null,
+    "RMSE": null,
+    "RandomCrop": null,
+    "RandomMirror": null,
+    "Saver": null,
+    "ToTensor": null,
+    "__annotations__": null,
+    "__builtins__": null,
+    "__cached__": null,
+    "__doc__": null,
+    "__file__": "train.py",
+    "__loader__": null,
+    "__name__": "__main__",
+    "__package__": null,
+    "__spec__": null,
+    "batchnorm": null,
+    "ckpt_dir": "./",
+    "ckpt_path": "./checkpoint.pth.tar",
+    "comp_fns": [
+        null,
+        null
+    ],
+    "conv1x1": null,
+    "conv3x3": null,
+    "convbnrelu": null,
+    "crit_depth": null,
+    "crit_segm": null,
+    "crop_size": 400,
+    "decoder": null,
+    "depth_scale": 5000.0,
+    "encoder": null,
+    "ignore_depth": 0,
+    "ignore_index": 255,
+    "img_mean": [
+        0.485,
+        0.456,
+        0.406
+    ],
+    "img_scale": 0.00392156862745098,
+    "img_std": [
+        0.229,
+        0.224,
+        0.225
+    ],
+    "init_vals": [
+        0.0,
+        10000.0
+    ],
+    "json": null,
+    "load_state_dict": null,
+    "logging": null,
+    "lr_decoder": 0.001,
+    "lr_encoder": 0.01,
+    "make_list": null,
+    "momentum_decoder": 0.9,
+    "momentum_encoder": 0.9,
+    "n_epochs": 10,
+    "nn": null,
+    "normalise_params": [
+        0.00392156862745098,
+        [
+            [
+                [
+                    0.485,
+                    0.456,
+                    0.406
+                ]
+            ]
+        ],
+        [
+            [
+                [
+                    0.229,
+                    0.224,
+                    0.225
+                ]
+            ]
+        ],
+        5000.0
+    ],
+    "np": null,
+    "num_classes": [
+        40,
+        1
+    ],
+    "operator": null,
+    "optims": [
+        null,
+        null
+    ],
+    "os": null,
+    "torch": null,
+    "train_batch_size": 4,
+    "train_file": "dataset/train_list_depth.txt",
+    "trainloader": null,
+    "transform_common": [
+        null,
+        null
+    ],
+    "transform_train": null,
+    "transform_val": null,
+    "transforms": null,
+    "val_batch_size": 4,
+    "val_file": "dataset/val_list_depth.txt",
+    "valloader": null,
+    "weight_decay_decoder": 1e-05,
+    "weight_decay_encoder": 1e-05
+}

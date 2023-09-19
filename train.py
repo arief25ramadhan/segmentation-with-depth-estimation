@@ -1,7 +1,16 @@
-from dataset.utils import Normalise, RandomCrop, ToTensor, RandomMirror
-import torchvision.transforms as transforms
+import torch
+import torch.nn as nn
+import numpy as np
+import operator
+import json
+import logging
+import os
+
 from dataset import HydranetDataset
+import torchvision.transforms as transforms
 from model import *
+from model_helpers import Saver, load_state_dict
+from utils import Normalise, RandomCrop, ToTensor, RandomMirror, InvHuberLoss, AverageMeter, MeanIoU, RMSE
 
 img_scale = 1.0 / 255
 depth_scale = 5000.0
@@ -10,7 +19,6 @@ img_mean = np.array([0.485, 0.456, 0.406])
 img_std = np.array([0.229, 0.224, 0.225])
 
 normalise_params = [img_scale, img_mean.reshape((1, 1, 3)), img_std.reshape((1, 1, 3)), depth_scale,]
-
 transform_common = [Normalise(*normalise_params), ToTensor()]
 
 crop_size = 400
@@ -21,8 +29,8 @@ from torch.utils.data import DataLoader
 
 train_batch_size = 4
 val_batch_size = 4
-train_file = "train_list_depth.txt"
-val_file = "val_list_depth.txt"
+train_file = "dataset/train_list_depth.txt"
+val_file = "dataset/val_list_depth.txt"
 
 #TRAIN DATALOADER
 trainloader = DataLoader(
@@ -42,13 +50,11 @@ valloader = DataLoader(HydranetDataset(val_file, transform=transform_val,),
     drop_last=False,)
 
 encoder = MobileNetv2()
-encoder.load_state_dict(torch.load("mobilenetv2-e6e8dd43.pth"))
+encoder.load_state_dict(torch.load("dataset/mobilenetv2-e6e8dd43.pth"))
 
 num_classes = (40, 1)
 decoder = MTLWRefineNet(encoder._out_c, num_classes)
 #print(decoder)
-
-from utils import InvHuberLoss
 
 ignore_index = 255
 ignore_depth = 0
@@ -67,11 +73,6 @@ optims = [torch.optim.SGD(encoder.parameters(), lr=lr_encoder, momentum=momentum
          torch.optim.SGD(decoder.parameters(), lr=lr_decoder, momentum=momentum_decoder, weight_decay=weight_decay_decoder)]
 
 n_epochs = 10
-
-from model_helpers import Saver, load_state_dict
-import operator
-import json
-import logging
 
 init_vals = (0.0, 10000.0)
 comp_fns = [operator.gt, operator.lt]
@@ -102,7 +103,6 @@ opt_scheds = []
 for opt in optims:
     opt_scheds.append(torch.optim.lr_scheduler.MultiStepLR(opt, np.arange(start_epoch + 1, n_epochs, 100), gamma=0.1))
 
-from utils import AverageMeter
 #from model_helpers import get_input_and_targets
 from tqdm import tqdm
 
@@ -184,8 +184,6 @@ def validate(model, metrics, dataloader):
     vals, _ = get_val(metrics)
     print("----" * 5)
     return vals
-
-from utils import MeanIoU, RMSE
 
 crop_size = 400
 batch_size = 4
