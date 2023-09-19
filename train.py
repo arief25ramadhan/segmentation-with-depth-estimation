@@ -1,88 +1,143 @@
-import torch
+from dataset.utils import Normalise, RandomCrop, ToTensor, RandomMirror
+import torchvision.transforms as transforms
+from dataset import HydranetDataset
+from model import *
+
+img_scale = 1.0 / 255
+depth_scale = 5000.0
+
+img_mean = np.array([0.485, 0.456, 0.406])
+img_std = np.array([0.229, 0.224, 0.225])
+
+normalise_params = [img_scale, img_mean.reshape((1, 1, 3)), img_std.reshape((1, 1, 3)), depth_scale,]
+
+transform_common = [Normalise(*normalise_params), ToTensor()]
+
+crop_size = 400
+transform_train = transforms.Compose([RandomMirror(), RandomCrop(crop_size)] + transform_common)
+transform_val = transforms.Compose(transform_common)
+
+from torch.utils.data import DataLoader
+
+train_batch_size = 4
+val_batch_size = 4
+train_file = "train_list_depth.txt"
+val_file = "val_list_depth.txt"
+
+#TRAIN DATALOADER
+trainloader = DataLoader(
+    HydranetDataset(train_file, transform=transform_train,),
+    batch_size=train_batch_size,
+    shuffle=True,
+    num_workers=4,
+    pin_memory=True,
+    drop_last=True,
+)
+
+# VALIDATION DATALOADER
+valloader = DataLoader(HydranetDataset(val_file, transform=transform_val,),
+    batch_size=val_batch_size,
+    shuffle=False, num_workers=4,
+    pin_memory=True,
+    drop_last=False,)
+
+encoder = MobileNetv2()
+encoder.load_state_dict(torch.load("mobilenetv2-e6e8dd43.pth"))
+
+num_classes = (40, 1)
+decoder = MTLWRefineNet(encoder._out_c, num_classes)
+#print(decoder)
+
+from utils import InvHuberLoss
+
+ignore_index = 255
+ignore_depth = 0
+
+crit_segm = nn.CrossEntropyLoss(ignore_index=ignore_index).cuda()
+crit_depth = InvHuberLoss(ignore_index=ignore_depth).cuda()
+
+lr_encoder = 1e-2
+lr_decoder = 1e-3
+momentum_encoder = 0.9
+momentum_decoder = 0.9
+weight_decay_encoder = 1e-5
+weight_decay_decoder = 1e-5
+
+optims = [torch.optim.SGD(encoder.parameters(), lr=lr_encoder, momentum=momentum_encoder, weight_decay=weight_decay_encoder),
+         torch.optim.SGD(decoder.parameters(), lr=lr_decoder, momentum=momentum_decoder, weight_decay=weight_decay_decoder)]
+
+n_epochs = 10
+
+from model_helpers import Saver, load_state_dict
+import operator
+import json
+import logging
+
+init_vals = (0.0, 10000.0)
+comp_fns = [operator.gt, operator.lt]
+ckpt_dir = "./"
+ckpt_path = "./checkpoint.pth.tar"
+
+saver = Saver(
+    args=locals(),
+    ckpt_dir=ckpt_dir,
+    best_val=init_vals,
+    condition=comp_fns,
+    save_several_mode=all,
+)
+
+hydranet = nn.DataParallel(nn.Sequential(encoder, decoder).cuda()) # Use .cpu() if you prefer a slow death
+
+print("Model has {} parameters".format(sum([p.numel() for p in hydranet.parameters()])))
+
+start_epoch, _, state_dict = saver.maybe_load(ckpt_path=ckpt_path, keys_to_load=["epoch", "best_val", "state_dict"],)
+load_state_dict(hydranet, state_dict)
+
+if start_epoch is None:
+    start_epoch = 0
+
+print(start_epoch)
+
+opt_scheds = []
+for opt in optims:
+    opt_scheds.append(torch.optim.lr_scheduler.MultiStepLR(opt, np.arange(start_epoch + 1, n_epochs, 100), gamma=0.1))
+
 from utils import AverageMeter
+#from model_helpers import get_input_and_targets
 from tqdm import tqdm
-
-root = "nyu_depth_v2_labeled.mat"
-
-
-train_augmentations = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.RandomResizedCrop((240, 320)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomRotation(50),
-    transforms.GaussianBlur(kernel_size=(5, 5), sigma=(1, 1)),
-    transforms.ElasticTransform(alpha=25.0, sigma=5.0),
-])
-
-test_augmentations = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Resize((240, 320)),
-])
-
-train_nyu_dataset = NyuDataset(root, augmentations=train_augmentations, normalize=True, depth_norm=10)
-test_nyu_dataset = NyuDataset(root, augmentations=test_augmentations, normalize=True, depth_norm=10)
-
-
-
-from torch.utils.data import random_split
-
-seed = 42
-
-# get train split
-num_train = round(0.7*len(train_nyu_dataset))
-num_remain = round(0.3*len(train_nyu_dataset))
-(train_dataset, _) = random_split(train_nyu_dataset,
-                                              [num_train, num_remain],
-                                              generator=torch.Generator().manual_seed(seed))
-
-""" 
-Sketchy hack to get valid/test datasets
-"""
-
-(_, remain_dataset) = random_split(test_nyu_dataset,
-                                              [num_train, num_remain],
-                                              generator=torch.Generator().manual_seed(seed))
-
-# get valid and test split
-num_valid = round(0.8*len(remain_dataset))
-num_test = round(0.2*len(remain_dataset))
-(valid_dataset, test_dataset) = random_split(remain_dataset,
-                                             [num_valid, num_test],
-                                              generator=torch.Generator().manual_seed(seed))
-
-
-train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, pin_memory=True) 
-valid_dataloader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False, pin_memory=True)
-test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, pin_memory=True)
-
-
 
 def train(model, opts, crits, dataloader, loss_coeffs=(1.0,), grad_norm=0.0):
     model.train()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     loss_meter = AverageMeter()
     pbar = tqdm(dataloader)
 
     for sample in pbar:
         loss = 0.0
-        input = #TODO: Get the Input
-        targets = #TODO: Get the Targets
-        
-        #FORWARD
-        outputs = #TODO: Run a Forward pass
+        input = sample["image"].float().to(device)
+        targets = [sample[k].to(device) for k in dataloader.dataset.masks_names]
+        #[[sample["depth"].to(device), sample["segm"].to(device)]
+        #input, targets = get_input_and_targets(sample=sample, dataloader=dataloader, device=device) # Get the data
+        outputs = model(input) # Forward
+        #outputs = list(outputs)
 
         for out, target, crit, loss_coeff in zip(outputs, targets, crits, loss_coeffs):
-            #TODO: Increment the Loss
+            loss += loss_coeff * crit(
+                F.interpolate(
+                    out, size=target.size()[1:], mode="bilinear", align_corners=False
+                ).squeeze(dim=1),
+                target.squeeze(dim=1),
+            )
 
-        # BACKWARD
-        #TODO: Zero Out the Gradients
-        #TODO: Call Loss.Backward
-
+        # Backward
+        for opt in opts:
+            opt.zero_grad()
+        loss.backward()
         if grad_norm > 0.0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), grad_norm)
-        #TODO: Run one step
+        for opt in opts:
+            opt.step()
 
         loss_meter.update(loss.item())
         pbar.set_description(
@@ -90,7 +145,7 @@ def train(model, opts, crits, dataloader, loss_coeffs=(1.0,), grad_norm=0.0):
         )
 
 def validate(model, metrics, dataloader):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     model.eval()
     for metric in metrics:
         metric.reset()
@@ -129,3 +184,25 @@ def validate(model, metrics, dataloader):
     vals, _ = get_val(metrics)
     print("----" * 5)
     return vals
+
+from utils import MeanIoU, RMSE
+
+crop_size = 400
+batch_size = 4
+val_batch_size = 4
+val_every = 5
+loss_coeffs = (0.5, 0.5)
+
+for i in range(start_epoch, n_epochs):
+    for sched in opt_scheds:
+        sched.step(i)
+
+    print("Epoch {:d}".format(i))
+    train(hydranet, optims, [crit_segm, crit_depth], trainloader, loss_coeffs)
+
+    if i % val_every == 0:
+        metrics = [MeanIoU(num_classes[0]),RMSE(ignore_val=ignore_depth),]
+
+        with torch.no_grad():
+            vals = validate(hydranet, metrics, valloader)
+        saver.maybe_save(new_val=vals, dict_to_save={"state_dict": hydranet.state_dict(), "epoch": i})

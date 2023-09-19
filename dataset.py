@@ -7,12 +7,13 @@ import numpy as np
 
 import glob
 
-depth = sorted(glob.glob('nyud/depth/*.png'))
-seg = sorted(glob.glob('nyud/masks/*.png'))
-images = sorted(glob.glob('nyud/rgb/*.png'))
+depth = sorted(glob.glob('dataset/nyud/depth/*.png'))
+seg = sorted(glob.glob('dataset/nyud/masks/*.png'))
+images = sorted(glob.glob('dataset/nyud/rgb/*.png'))
 
-CMAP = np.load('cmap_nyud.npy')
+CMAP = np.load('dataset/cmap_nyud.npy')
 
+from torch.utils.data import Dataset
 
 class HydranetDataset(Dataset):
 
@@ -30,10 +31,12 @@ class HydranetDataset(Dataset):
     def __getitem__(self, idx):
         abs_paths = [os.path.join(self.root_dir, rpath) for rpath in self.datalist[idx]] # Will output list of nyud/*/00000.png
         sample = {}
-        sample["image"] = #TODO: Copy/Paste your loaded code
+        sample["image"] = np.array(Image.open(abs_paths[0])) #dtype = np.float32
 
         for mask_name, mask_path in zip(self.masks_names, abs_paths[1:]):
-            #TODO: Copy/Paste your loaded code
+            mask = np.array(Image.open(mask_path))
+            assert len(mask.shape) == 2, "Masks must be encoded without colourmap"
+            sample[mask_name] = mask
 
         if self.transform:
             sample["names"] = self.masks_names
