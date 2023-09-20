@@ -5,17 +5,16 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-# Figure 2-top row
-img_path = '../../examples/ExpNYUD_joint/000464.png'
+img_path = '/content/nyud/rgb/000001.png'
 img = np.array(Image.open(img_path))
-gt_segm = np.array(Image.open('../../examples/ExpNYUD_joint/segm_gt_000464.png'))
-gt_depth = np.array(Image.open('../../examples/ExpNYUD_joint/dept
+gt_segm = np.array(Image.open('/content/nyud/masks/000001.png'))
+gt_depth = np.array(Image.open('/content/nyud/depth/000001.png'))
 
 def prepare_img(img):
     return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
 
 # Pre-processing and post-processing constants #
-CMAP = np.load('../cmap_nyud.npy')
+CMAP = np.load('cmap_nyud.npy')
 DEPTH_COEFF = 5000. # to convert into metres
 HAS_CUDA = torch.cuda.is_available()
 IMG_SCALE  = 1./255
@@ -30,7 +29,7 @@ with torch.no_grad():
     img_var = Variable(torch.from_numpy(prepare_img(img).transpose(2, 0, 1)[None]), requires_grad=False).float()
     if HAS_CUDA:
         img_var = img_var.cuda()
-    segm, depth = model(img_var)
+    segm, depth = hydranet(img_var)
     segm = cv2.resize(segm[0, :NUM_CLASSES].cpu().data.numpy().transpose(1, 2, 0),
                       img.shape[:2][::-1],
                       interpolation=cv2.INTER_CUBIC)
