@@ -1,5 +1,9 @@
+import cv2
 import torch
 from torch.autograd import Variable
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
 
 # Figure 2-top row
 img_path = '../../examples/ExpNYUD_joint/000464.png'
