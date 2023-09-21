@@ -1,89 +1,156 @@
-# Real-Time Joint Semantic Segmentation and Depth Estimation Using Asymmetric Annotations
+# YOLOv3 Object Detection from Scratch
+
+<img src="https://pjreddie.com/media/image/yologo_2.png" alt="drawing" width="110"/>
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 
-## 1. Project Summary
+This project aims to create a joint semantic segmentation and deepth estimation model from scratch. This algorithm can perform segmentation and depth estimation simultaneously within a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
 
-In this repo, we implement U-Net Semantic Segmentation from scratch for Carvana Image Masking Challenge. The main difference between this architecture and the original paper is that we use padded convolutions instead of valid (unpadded) convolutions.
+## Table of Contents
 
-### 1.1. Architecture
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+3. [Project Structure](#project-structure)
+4. [Training](#training)
+   - [Data Preparation](#data-preparation)
+   - [Model Configuration](#model-configuration)
+   - [Training Process](#training-process)
+5. [Inference](#inference)
+6. [Performance Tuning](#performance-tuning)
 
-The U-Net architecture is a popular CNN model for image segmentation. It was first introduced in 2015, and has since been widely adopted in various field. The U-Net consists of an encoder path to capture features, a decoder path for generating a segmentation map, and skip connections connect the encoder and decoder paths, enabling the model to combine low-level and high-level features. The U-Net effectively captures details and context, making it ideal for segmentation tasks. The U-Net architecture is as follow.
+## 1. Introduction
 
-<p align="center">
-  <img src="media/u-net-architecture.png" width="350" title="hover text">
-</p>
+Object detection is a fundamental task in computer vision, and YOLO is one of the most popular and effective approaches. This project aims to build the YOLOv3 from the ground up. By following the steps outlined here, we hope you will gain a deep understanding of the architecture, training process, and inference pipeline of YOLOv3.
 
-### 1.2. Dataset
-The dataset is obtained from Kaggle's Carvana Image Masking Challenge in 2017. The goal is to develop an algorithm that automatically removes the photo studio background from the car.
+### 1.1. A brief explanation of the Model
 
-In this repository, we only use the training set, and split it into train/val/test set. We don't download the test set from Kaggle because it has a very huge size. The data consists of car images and their corresponding masks as  shown below.
+Yolo v3 uses a single neural network to look at the full image. It divides the image into regions and predicts bounding boxes and probabilities for each region. These bounding boxes are weighted by the predicted probabilities. YOLOv3 uses a few tricks to improve training and increase performance from its previous iteration, including: multi-scale predictions, and better backbone classifier. The figure below shows the architecture of YOLOv3.
 
-<p align="center">
-  <img src="media/0cdf5b5d0ce1_04.jpg" width="350" title="hover text">
-  <img src="media/0cdf5b5d0ce1_04_mask.gif" width="350" title="hover text">
-</p>
+<img src="https://miro.medium.com/v2/resize:fit:1200/1*d4Eg17IVJ0L41e7CTWLLSg.png" alt="drawing" width="800"/>
 
-### 1.3. Results
+Visit this [web page](https://pjreddie.com/darknet/yolo/) or [paper](https://arxiv.org/abs/1804.02767) for a more detailed technical explanation of YOLOv3 model.
 
-After training the data for 10 epoch, we achieved an accuracy of 99.2% on the test set. We consider this result as satisfactory enough considering the short time of development. 
+## 2. Getting Started
 
-We also convert the model into Onnx runtime to speed up the inference time by 2x. The media below compares the FPS performance of the original torch model and onnx model.
+### 2.1. Prerequisites
+Before you begin, make sure you have the following prerequisites installed:
 
-## 2. Usage
+- Python 3
+- Pytorch
+- NumPy
+- OpenCV
+- PIL
 
-### 2.1. Dependencies
+### 2.2. Installation
 
-The dependencies of this project includes:
+1. Clone this repository to your local machine:
 
-- numpy
-- torch
-- torchvision
-- Pillow
-- opencv
-- albumentations
+   ```bash
+   git clone https://github.com/arief25ramadhan/segmentation-with-depth-estimation.git
+   ```
 
-### 2.2. Training
+2. Navigate to the project directory:
 
-We use automatic mixed precision to speed up the training process. The model is trained for 10 epochs. To perform training, you could run this command on terminal:
- ```
+   ```bash
+   cd segmentation-with-depth-estimations
+   ```
+
+3. Install the required Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### 2.3. Data Preparation
+
+1. Download the PASCAL VOC dataset and annotations from [here](https://www.kaggle.com/datasets/aladdinpersson/pascal-voc-dataset-used-in-yolov3-video). The PASCAL VOC is a dataset of 20 classes of person, vehicles, animals, and indoor objects. The detailed list can be seen in the config.py script.
+
+2. Organize your dataset in the following directory structure:
+
+   ```
+   dataset/
+   |-- PASCAL_VOC/
+       |-- images/          # Contain images
+       |-- labels/          # Contain labels
+       |-- train.csv        # Define image belongs to train set
+       |-- test.csv         # Define image belongs to test set
+   ```
+
+
+## 3. Project Structure
+
+```
+|-- dataset/                 # Folder containing data files
+|-- model/                   # Folder containing model files
+|-- train.py                 # Training script
+|-- dataset.py               # Script to load dataset
+|-- loss.py                  # Script to load loss function
+|-- utils.py                 # Script containing helper functions
+|-- config.py                # Script containing hyperparameters
+|-- model.py                 # Script to load model
+|-- inference.py             # Script to perform inference
+```
+
+
+## 4. Training
+
+Training YOLOv3 from scratch requires model configuration, and the training process itself.
+
+### 4.1. Model Configuration
+
+Configure the YOLOv3 model architecture in the `model.py` file. You can download the pretrained model from [here](https://www.kaggle.com/datasets/1cf520aba05e023f2f80099ef497a8f3668516c39e6f673531e3e47407c46694).
+
+### 4.2. Training Process
+
+Run the training script to start training:
+
+```bash
 python train.py
 ```
 
-### 2.3. Evaluate
+## 5. Inference
 
-To evaluate the data on the test set, run this command
- ```
-python test.py
+After training your YOLOv3 model, you can perform inference on images.
+
+```bash
+python inference.py --image path/to/your/image.jpg --model path/to/your/model_weights.h5
 ```
 
-### 2.4. Inference an Image
+## 6. Performance Results
 
-To perform an inference on a single image, run this command:
+After training the model for 10 epochs, we look at the model's performance qualiatively and quantitatively. Figure below shows some of the inference results of our Yolo V3 model. We can see that the model does mispredicted. This project is only for learning. So, creating the most accurate model, which requires a lot of tuning and training, is not our priority.
+
+<img src="media/000015_predicted.jpg" alt="drawing" width="400"/>
+<img src="media/000004_predicted.jpg" alt="drawing" width="400"/>
+
+We train the Yolo V3 from the checkpoint created by Aladdin Persson. The performance of the model is shown by the table below.
+
+| Model                   | mAP @ 50 IoU |
+| ----------------------- |:-----------------:|
+| YOLOv3 (Pascal VOC) 	  | 77.64             |
+| YOLOv3 Further Trained  | 78.2              |
+
+
+## 7. Acknowledgement
+
+### 7.1. The Original Paper
+The implementation is based on the [YOLOv3: An Incremental Improvement](https://arxiv.org/abs/1804.02767) by Joseph Redmon and Ali Farhadi.
+
+#### Abstract
+We present some updates to YOLO! We made a bunch of little design changes to make it better. We also trained this new network that’s pretty swell. It’s a little bigger than last time but more accurate. It’s still fast though, don’t worry. At 320 × 320 YOLOv3 runs in 22 ms at 28.2 mAP, as accurate as SSD but three times faster. When we look at the old .5 IOU mAP detection metric YOLOv3 is quite good. It achieves 57.9 AP50 in 51 ms on a Titan X, compared to 57.5 AP50 in 198 ms by RetinaNet, similar performance but 3.8× faster. As always, all the code is online at https://pjreddie.com/yolo/.
 
 ```
-python inference.py 
+@article{yolov3,
+  title={YOLOv3: An Incremental Improvement},
+  author={Redmon, Joseph and Farhadi, Ali},
+  journal = {arXiv},
+  year={2018}
+}
 ```
 
-Make sure to change the image_path and output_path in the inference.py script. Figure 2 is the example result of the inference.
+### 7.2. The Code 
 
-<p align="center">
-  <img src="media/0ee135a3cccc_04.jpg" width="350" title="hover text">
-  <img src="media/masked_car_w.jpg" width="350" title="hover text">
-</p>
-
-
-<!-- ### 2.5. Speed Up Inference 
-
-We also convert the model to Onnx runtime to speed up the inference time. The onnx model is available in this path. To perform inference on onnx runtime run this command
-
-```
-python inference_onnx.py 
-```
-
-Make sure to change the image_path and output_path in the inference_onnx.py script. -->
-
-## Credit 
-
-This project is mainly for learning purposes and is heavily based on the tutorial from [Aladdin Person's Youtube channel](https://www.youtube.com/watch?v=IHq1t7NxS8k). The original code is available [here](https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/image_segmentation/semantic_segmentation_unet).
+This project is for learning purposes and made by following the tutorial by Aladdin Persson in his [Youtube channel](https://www.youtube.com/watch?v=Grir6TZbc1M). The original code is also available in [his repository](https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/object_detection/YOLOv3).
