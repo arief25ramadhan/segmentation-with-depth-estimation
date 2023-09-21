@@ -137,20 +137,25 @@ We train the Yolo V3 from the checkpoint created by Aladdin Persson. The perform
 ## 7. Acknowledgement
 
 ### 7.1. The Original Paper
-The implementation is based on the [YOLOv3: An Incremental Improvement](https://arxiv.org/abs/1804.02767) by Joseph Redmon and Ali Farhadi.
+The implementation is based on the [Real-Time Joint Semantic Segmentation and Depth Estimation Using Asymmetric Annotations
+](https://arxiv.org/abs/1809.04766) paper by Vladimir Nekrasov, Thanuja Dharmasiri, Andrew Spek, Tom Drummond, Chunhua Shen, and Ian Reid.
 
 #### Abstract
-We present some updates to YOLO! We made a bunch of little design changes to make it better. We also trained this new network that’s pretty swell. It’s a little bigger than last time but more accurate. It’s still fast though, don’t worry. At 320 × 320 YOLOv3 runs in 22 ms at 28.2 mAP, as accurate as SSD but three times faster. When we look at the old .5 IOU mAP detection metric YOLOv3 is quite good. It achieves 57.9 AP50 in 51 ms on a Titan X, compared to 57.5 AP50 in 198 ms by RetinaNet, similar performance but 3.8× faster. As always, all the code is online at https://pjreddie.com/yolo/.
+Deployment of deep learning models in robotics as sensory information extractors can be a daunting task to handle, even using generic GPU cards. Here, we address three of its most prominent hurdles, namely, i) the adaptation of a single model to perform multiple tasks at once (in this work, we consider depth estimation and semantic segmentation crucial for acquiring geometric and semantic understanding of the scene), while ii) doing it in real-time, and iii) using asymmetric datasets with uneven numbers of annotations per each modality. To overcome the first two issues, we adapt a recently proposed real-time semantic segmentation network, making changes to further reduce the number of floating point operations. To approach the third issue, we embrace a simple solution based on hard knowledge distillation under the assumption of having access to a powerful `teacher' network. We showcase how our system can be easily extended to handle more tasks, and more datasets, all at once, performing depth estimation and segmentation both indoors and outdoors with a single model. Quantitatively, we achieve results equivalent to (or better than) current state-of-the-art approaches with one forward pass costing just 13ms and 6.5 GFLOPs on 640x480 inputs. This efficiency allows us to directly incorporate the raw predictions of our network into the SemanticFusion framework for dense 3D semantic reconstruction of the scene.
 
 ```
-@article{yolov3,
-  title={YOLOv3: An Incremental Improvement},
-  author={Redmon, Joseph and Farhadi, Ali},
-  journal = {arXiv},
-  year={2018}
+@misc{nekrasov2019realtime,
+      title={Real-Time Joint Semantic Segmentation and Depth Estimation Using Asymmetric Annotations}, 
+      author={Vladimir Nekrasov and Thanuja Dharmasiri and Andrew Spek and Tom Drummond and Chunhua Shen and Ian Reid},
+      year={2019},
+      eprint={1809.04766},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
 ```
 
 ### 7.2. The Code 
 
-This project is for learning purposes and made by following the tutorial by Aladdin Persson in his [Youtube channel](https://www.youtube.com/watch?v=Grir6TZbc1M). The original code is also available in [his repository](https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/object_detection/YOLOv3).
+This project is for learning purposes and made by following the steps in [thinkautonomous.ai](https://www.thinkautonomous.ai/) Hydranet's course. We also use sources from these repository:
+- https://github.com/Jeremy26/hydranets_course
+- https://github.com/DrSleep/multi-task-refinenet
