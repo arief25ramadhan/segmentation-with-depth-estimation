@@ -1,11 +1,11 @@
 # Multi Task Learning: Semantic Segmentation and Depth Estimation Using a Single Network
 
-<img src="media/architecture.png" alt="drawing" width="110"/>
-
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 
-This project aims to create a joint semantic segmentation and deepth estimation model from scratch. This algorithm can perform segmentation and depth estimation simultaneously within a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
+This project aims to create a joint semantic segmentation and depth estimation model from scratch. Semantic Segmentation is the process of classifying each pixel in an image into one of several predefined classes (e.g., road, building, car), while Depth Estimation focuses on predicting the depth information (distance from the camera) for each pixel in the image. Combining these tasks into a single model opens up exciting possibilities for understanding the 3D world from 2D images.
+
+We will create an algorithm that can perform both segmentation and depth estimation simultaneously using a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
 
 ## Table of Contents
 
@@ -23,15 +23,15 @@ This project aims to create a joint semantic segmentation and deepth estimation 
 
 ## 1. Introduction
 
-Object detection is a fundamental task in computer vision, and YOLO is one of the most popular and effective approaches. This project aims to build the YOLOv3 from the ground up. By following the steps outlined here, we hope you will gain a deep understanding of the architecture, training process, and inference pipeline of YOLOv3.
+The ability to perform both semantic segmentation and depth estimation in real-time has applications in autonomous driving, robotics, augmented reality, and more. This project aims to provide a practical and accessible implementation of a multi-task network capable of handling these tasks simultaneously.
 
 ### 1.1. A brief explanation of the Model
 
 Yolo v3 uses a single neural network to look at the full image. It divides the image into regions and predicts bounding boxes and probabilities for each region. These bounding boxes are weighted by the predicted probabilities. YOLOv3 uses a few tricks to improve training and increase performance from its previous iteration, including: multi-scale predictions, and better backbone classifier. The figure below shows the architecture of YOLOv3.
 
-<img src="https://miro.medium.com/v2/resize:fit:1200/1*d4Eg17IVJ0L41e7CTWLLSg.png" alt="drawing" width="800"/>
+<img src="media/architecture.png" alt="drawing" width="1000"/>
 
-Visit this [web page](https://pjreddie.com/darknet/yolo/) or [paper](https://arxiv.org/abs/1804.02767) for a more detailed technical explanation of YOLOv3 model.
+Visit this [paper](https://arxiv.org/abs/1809.04766) for a more detailed technical explanation of the model.
 
 ## 2. Getting Started
 
@@ -116,15 +116,15 @@ python train.py
 After training your YOLOv3 model, you can perform inference on images.
 
 ```bash
-python inference.py --image path/to/your/image.jpg --model path/to/your/model_weights.h5
+python inference.py
 ```
 
 ## 6. Performance Results
 
 After training the model for 10 epochs, we look at the model's performance qualiatively and quantitatively. Figure below shows some of the inference results of our Yolo V3 model. We can see that the model does mispredicted. This project is only for learning. So, creating the most accurate model, which requires a lot of tuning and training, is not our priority.
 
-<img src="media/000015_predicted.jpg" alt="drawing" width="400"/>
-<img src="media/000004_predicted.jpg" alt="drawing" width="400"/>
+<!-- <img src="media/000015_predicted.jpg" alt="drawing" width="400"/>
+<img src="media/000004_predicted.jpg" alt="drawing" width="400"/> -->
 
 We train the Yolo V3 from the checkpoint created by Aladdin Persson. The performance of the model is shown by the table below.
 
