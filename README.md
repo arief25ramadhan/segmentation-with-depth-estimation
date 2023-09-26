@@ -3,9 +3,9 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 
-This project aims to create a joint semantic segmentation and depth estimation model from scratch. Semantic Segmentation is the process of classifying each pixel in an image into one of several predefined classes (e.g., road, building, car), while Depth Estimation focuses on predicting the depth information (distance from the camera) for each pixel in the image. Combining these tasks into a single model opens up exciting possibilities for understanding the 3D world from 2D images.
+This project aims to create a joint semantic segmentation and monocular depth estimation model from scratch. Semantic segmentation is the process of classifying each pixel in an image into one of several predefined classes (e.g., road, building, car), while depth estimation focuses on predicting the depth information (distance from the camera) for each pixel in the image. Combining these tasks into a single model opens up exciting possibilities for understanding the 3D world from 2D images.
 
-We will create an algorithm that can perform both segmentation and depth estimation simultaneously using a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
+We will create an algorithm that perform both segmentation and depth estimation simultaneously using a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
 
 ## Table of Contents
 
@@ -27,7 +27,9 @@ The ability to perform both semantic segmentation and depth estimation in real-t
 
 ### 1.1. A brief explanation of the Model
 
-Yolo v3 uses a single neural network to look at the full image. It divides the image into regions and predicts bounding boxes and probabilities for each region. These bounding boxes are weighted by the predicted probabilities. YOLOv3 uses a few tricks to improve training and increase performance from its previous iteration, including: multi-scale predictions, and better backbone classifier. The figure below shows the architecture of YOLOv3.
+Multi-task learning (MTL) is a deep learning paradigm where a single neural network model is trained to perform multiple related tasks simultaneously. This approach is beneficial in scenarios where the tasks share some common underlying features or representations. Segmentation and depth estimation are two such tasks that can benefit from MTL.
+
+We will build an architecture capable of performing multi task learning. It consists of an encoder decoder network with skip connections, and it has two head: one for segmentation and another for depth estimation. This approach reduces the computational cost and memory requirements compared to training two independent models.
 
 <img src="media/architecture.png" alt="drawing" width="1000"/>
 
@@ -66,17 +68,22 @@ Before you begin, make sure you have the following prerequisites installed:
 
 ### 2.3. Data Preparation
 
-1. Download the PASCAL VOC dataset and annotations from [here](https://www.kaggle.com/datasets/aladdinpersson/pascal-voc-dataset-used-in-yolov3-video). The PASCAL VOC is a dataset of 20 classes of person, vehicles, animals, and indoor objects. The detailed list can be seen in the config.py script.
+1. Download the NYUD V2 dataset and annotations by running this command on your terminal. This dataset is based on Jeremy Cohen's [hydranet repository](https://github.com/Jeremy26/hydranets_course/blob/main/MTL_Train_Home.ipynb).
+
+
+```
+wget https://hydranets-data.s3.eu-west-3.amazonaws.com/hydranets-data-2.zip && unzip -q hydranets-data-2.zip && mv hydranets-data-2/* . && rm hydranets-data-2.zip && rm -rf hydranets-data-2
+```
+
 
 2. Organize your dataset in the following directory structure:
 
    ```
    dataset/
-   |-- PASCAL_VOC/
-       |-- images/          # Contain images
-       |-- labels/          # Contain labels
-       |-- train.csv        # Define image belongs to train set
-       |-- test.csv         # Define image belongs to test set
+   |-- nyud
+       |-- depth/          # Contain depth images
+       |-- masks/          # Contain segmentation images
+       |-- rgb/            # Contain rgb images
    ```
 
 
@@ -97,11 +104,11 @@ Before you begin, make sure you have the following prerequisites installed:
 
 ## 4. Training
 
-Training YOLOv3 from scratch requires model configuration, and the training process itself.
+Training this architecture from scratch requires model configuration, and the training process itself.
 
 ### 4.1. Model Configuration
 
-Configure the YOLOv3 model architecture in the `model.py` file. You can download the pretrained model from [here](https://www.kaggle.com/datasets/1cf520aba05e023f2f80099ef497a8f3668516c39e6f673531e3e47407c46694).
+Configure the model architecture in the `model.py` file.
 
 ### 4.2. Training Process
 
@@ -113,7 +120,7 @@ python train.py
 
 ## 5. Inference
 
-After training your YOLOv3 model, you can perform inference on images.
+After training your model, you can perform inference on images.
 
 ```bash
 python inference.py
@@ -121,18 +128,10 @@ python inference.py
 
 ## 6. Performance Results
 
-After training the model for 10 epochs, we look at the model's performance qualiatively and quantitatively. Figure below shows some of the inference results of our Yolo V3 model. We can see that the model does mispredicted. This project is only for learning. So, creating the most accurate model, which requires a lot of tuning and training, is not our priority.
+After training the model for 10 epochs, we look at the model's performance qualiatively and quantitatively. Figure below shows some of the inference results of our model. We can see that the model does mispredicted. This project is only for learning. So, creating the most accurate model, which requires a lot of tuning and training, is not our priority.
 
 <!-- <img src="media/000015_predicted.jpg" alt="drawing" width="400"/>
 <img src="media/000004_predicted.jpg" alt="drawing" width="400"/> -->
-
-We train the Yolo V3 from the checkpoint created by Aladdin Persson. The performance of the model is shown by the table below.
-
-| Model                   | mAP @ 50 IoU |
-| ----------------------- |:-----------------:|
-| YOLOv3 (Pascal VOC) 	  | 77.64             |
-| YOLOv3 Further Trained  | 78.2              |
-
 
 ## 7. Acknowledgement
 
