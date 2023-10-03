@@ -3,9 +3,9 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 
-This project aims to create a joint semantic segmentation and monocular depth estimation model from scratch. Semantic segmentation is the process of classifying each pixel in an image into one of several predefined classes (e.g., road, building, car), while depth estimation focuses on predicting the depth information (distance from the camera) for each pixel in the image. Combining these tasks into a single model opens up exciting possibilities for understanding the 3D world from 2D images.
+This project aims to create a model that performs semantic segmentation and monocular depth estimation simultaneously. Semantic segmentation is the process of classifying each pixel in an image into one of several predefined classes (e.g., road, building, car), while depth estimation focuses on predicting the depth information (distance from the camera) for each pixel in the image. Combining these tasks into a single model opens up exciting possibilities for understanding the 3D world from 2D images.
 
-We will create an algorithm that perform both segmentation and depth estimation simultaneously using a single network. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this multi task model from the ground up.
+We will create the model architecture from scratch. We willl provide the step-by-step instructions, code, and resources to guide you through the process of implementing this model from the ground up.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ The ability to perform both semantic segmentation and depth estimation in real-t
 
 Multi-task learning (MTL) is a deep learning paradigm where a single neural network model is trained to perform multiple related tasks simultaneously. This approach is beneficial in scenarios where the tasks share some common underlying features or representations. Segmentation and depth estimation are two such tasks that can benefit from MTL.
 
-We will build an architecture capable of performing multi task learning. It consists of an encoder decoder network with skip connections, and it has two head: one for segmentation and another for depth estimation. This approach reduces the computational cost and memory requirements compared to training two independent models.
+The model architecture consists of an encoder decoder network with skip connections, and it has two head: one for segmentation and another for depth estimation. This approach reduces the computational cost and memory requirements compared to training two independent models.
 
 <img src="media/architecture.png" alt="drawing" width="1000"/>
 
