@@ -20,6 +20,15 @@ MIN_DEPTH = 0.
 NUM_CLASSES = 40
 NUM_TASKS = 2 # segm + depth
 
+# Load Model
+encoder = MobileNetv2()
+num_classes = (40, 1)
+decoder = MTLWRefineNet(encoder._out_c, num_classes)
+
+hydranet = nn.DataParallel(nn.Sequential(encoder, decoder).cuda()) # Use .cpu() if you prefer a slow death
+model_path = "checkpoint.pth.tar"
+checkpoint = torch.load(model_path)
+hydranet.load_state_dict(checkpoint['state_dict'])
 
 def inference(img):
     with torch.no_grad():
@@ -38,49 +47,28 @@ def inference(img):
 
     return segm, depth
 
-# Run the pipeline
-result_video = []
-for idx, img_path in enumerate(video_files):
-    image = np.array(Image.open(img_path))
+video_capture = cv2.VideoCapture('media/kitti_07.mp4')
+
+if not video_capture.isOpened():
+    print("Error: Could not open video file.")
+    exit()
+
+while (video_capture.isOpened()):
+
+    ret, frame = video_capture.read()
+
+    if not ret:
+        break
+
+    # Perform inference on frame
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image = Image.fromarray(frame)
     h, w, _ = image.shape 
-    depth, seg = pipeline(image)
+    depth, seg = inference(image)
     result_video.append(cv2.cvtColor(cv2.vconcat([image, seg, depth_to_rgb(depth)]), cv2.COLOR_BGR2RGB))
 
-out = cv2.VideoWriter('media/out.mp4',cv2.VideoWriter_fourcc(*'MP4V'), 15, (w,3*h))
+out = cv2.VideoWriter('media/kitti_07_output.mp4',cv2.VideoWriter_fourcc(*'MP4V'), 15, (w,3*h))
 
 for i in range(len(result_video)):
     out.write(result_video[i])
 out.release()
-
-
-# Create a VideoCapture object and read from input file
-# If the input is the camera, pass 0 instead of the video file name
-cap = cv2.VideoCapture('chaplin.mp4')
- 
-# Check if camera opened successfully
-if (cap.isOpened()== False): 
-  print("Error opening video stream or file")
- 
-# Read until video is completed
-while(cap.isOpened()):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-    if ret == True:
-        
-        # Display the resulting frame
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        cv2.imshow('Frame',frame)
-        
-        # Press Q on keyboard to  exit
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            break
- 
-    # Break the loop
-    else: 
-        break
- 
-# When everything done, release the video capture object
-cap.release()
- 
-# Closes all the frames
-cv2.destroyAllWindows()
