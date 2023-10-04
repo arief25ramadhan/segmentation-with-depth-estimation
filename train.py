@@ -72,7 +72,7 @@ weight_decay_decoder = 1e-5
 optims = [torch.optim.SGD(encoder.parameters(), lr=lr_encoder, momentum=momentum_encoder, weight_decay=weight_decay_encoder),
          torch.optim.SGD(decoder.parameters(), lr=lr_decoder, momentum=momentum_decoder, weight_decay=weight_decay_decoder)]
 
-n_epochs = 10
+n_epochs = 100
 
 init_vals = (0.0, 10000.0)
 comp_fns = [operator.gt, operator.lt]

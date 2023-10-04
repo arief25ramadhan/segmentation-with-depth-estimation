@@ -1,3 +1,5 @@
 dataset/
 *__pycache__*
 *.pth.tar*
+*.mp4
+*.png

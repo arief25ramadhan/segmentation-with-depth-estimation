@@ -4,12 +4,16 @@ from torch.autograd import Variable
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from model import MobileNetv2, MTLWRefineNet
+import torch.nn as nn
+import matplotlib.colors as co
+import matplotlib.cm as cm
 
 def prepare_img(img):
     return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
 
 # Pre-processing and post-processing constants #
-CMAP = np.load('cmap_nyud.npy')
+CMAP = np.load('dataset/cmap_nyud.npy')
 DEPTH_COEFF = 5000. # to convert into metres
 HAS_CUDA = torch.cuda.is_available()
 IMG_SCALE  = 1./255
@@ -47,6 +51,14 @@ def inference(img):
 
     return segm, depth
 
+
+def depth_to_rgb(depth):
+    normalizer = co.Normalize(vmin=0, vmax=80)
+    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
+    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
+    return colormapped_im
+
+result_video = []
 video_capture = cv2.VideoCapture('media/kitti_07.mp4')
 
 if not video_capture.isOpened():
@@ -62,9 +74,9 @@ while (video_capture.isOpened()):
 
     # Perform inference on frame
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image = Image.fromarray(frame)
-    h, w, _ = image.shape 
-    depth, seg = inference(image)
+    image = np.array(frame)
+    h, w, _ = image.shape
+    seg, depth = inference(image)
     result_video.append(cv2.cvtColor(cv2.vconcat([image, seg, depth_to_rgb(depth)]), cv2.COLOR_BGR2RGB))
 
 out = cv2.VideoWriter('media/kitti_07_output.mp4',cv2.VideoWriter_fourcc(*'MP4V'), 15, (w,3*h))
