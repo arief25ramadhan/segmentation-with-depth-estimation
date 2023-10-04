@@ -25,6 +25,18 @@ MIN_DEPTH = 0.
 NUM_CLASSES = 40
 NUM_TASKS = 2 # segm + depth
 
+
+# Load Model
+encoder = MobileNetv2()
+num_classes = (40, 1)
+decoder = MTLWRefineNet(encoder._out_c, num_classes)
+
+hydranet = nn.DataParallel(nn.Sequential(encoder_2, decoder_2).cuda()) # Use .cpu() if you prefer a slow death
+model_path = "checkpoint.pth.tar"
+checkpoint = torch.load(model_path)
+hydranet.load_state_dict(checkpoint['state_dict'])
+
+
 with torch.no_grad():
     img_var = Variable(torch.from_numpy(prepare_img(img).transpose(2, 0, 1)[None]), requires_grad=False).float()
     if HAS_CUDA:
