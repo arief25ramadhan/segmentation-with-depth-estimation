@@ -65,7 +65,7 @@
     "make_list": null,
     "momentum_decoder": 0.9,
     "momentum_encoder": 0.9,
-    "n_epochs": 10,
+    "n_epochs": 100,
     "nn": null,
     "normalise_params": [
         0.00392156862745098,

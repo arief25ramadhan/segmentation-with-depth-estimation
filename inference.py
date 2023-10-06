@@ -6,11 +6,13 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from model import MobileNetv2, MTLWRefineNet
 import torch.nn as nn
+import matplotlib.colors as co
+import matplotlib.cm as cm
 
-img_path = 'dataset/nyud/rgb/000001.png'
+img_path = 'dataset/nyud/rgb/000005.png'
 img = np.array(Image.open(img_path))
-gt_segm = np.array(Image.open('dataset/nyud/masks/000001.png'))
-gt_depth = np.array(Image.open('dataset/nyud/depth/000001.png'))
+gt_segm = np.array(Image.open('dataset/nyud/masks/000005.png'))
+gt_depth = np.array(Image.open('dataset/nyud/depth/000005.png'))
 
 def prepare_img(img):
     return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
@@ -50,11 +52,15 @@ with torch.no_grad():
                        interpolation=cv2.INTER_CUBIC)
     segm = CMAP[segm.argmax(axis=2) + 1].astype(np.uint8)
     depth = np.abs(depth)
-    
-# depth = np.clip(depth, MIN_DEPTH, MAX_DEPTH)
-colormap = plt.get_cmap('plasma')
-heatmap = (colormap(depth) * 2**16).astype(np.uint16)[:,:,:3]
-heatmap = cv2.cvtColor(heatmap, cv2.COLOR_RGB2BGR)
 
-cv2.imwrite('depth_save.png',heatmap)
-cv2.imwrite('segm_save.png',segm)
+def depth_to_rgb(depth):
+    normalizer = co.Normalize(vmin=0, vmax=8)
+    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
+    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
+    return colormapped_im
+
+depth = depth_to_rgb(depth)
+depth = cv2.cvtColor(depth, cv2.COLOR_RGB2BGR)
+
+cv2.imwrite('depth.jpg',depth)
+cv2.imwrite('segm.png',segm)

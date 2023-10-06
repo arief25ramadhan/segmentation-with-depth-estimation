@@ -3,3 +3,5 @@ dataset/
 *.pth.tar*
 *.mp4
 *.png
+inference_copy.py
+args.json

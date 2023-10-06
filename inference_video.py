@@ -53,7 +53,7 @@ def inference(img):
 
 
 def depth_to_rgb(depth):
-    normalizer = co.Normalize(vmin=0, vmax=80)
+    normalizer = co.Normalize(vmin=0, vmax=8)
     mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
     colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
     return colormapped_im
