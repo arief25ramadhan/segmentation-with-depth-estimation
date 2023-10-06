@@ -93,12 +93,12 @@ wget https://hydranets-data.s3.eu-west-3.amazonaws.com/hydranets-data-2.zip && u
 |-- dataset/                 # Folder containing data files
 |-- model/                   # Folder containing model files
 |-- train.py                 # Training script
-|-- dataset.py               # Script to load dataset
-|-- loss.py                  # Script to load loss function
+|-- dataset.py               # Script of dataset class
+|-- model_helpers.py         # Script to help save and load model
 |-- utils.py                 # Script containing helper functions
-|-- config.py                # Script containing hyperparameters
-|-- model.py                 # Script to load model
-|-- inference.py             # Script to perform inference
+|-- model.py                 # Script of model class
+|-- inference.py             # Script to perform inference on image
+|-- inference_video.py       # Script to perform inference on video
 ```
 
 
