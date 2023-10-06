@@ -126,6 +126,12 @@ After training your model, you can perform inference on images.
 python inference.py
 ```
 
+Or on video
+
+```bash
+python inference_video.py
+```
+
 ## 6. Performance Results
 
 After training the model for 10 epochs, we look at the model's performance qualiatively and quantitatively. Figure below shows some of the inference results of our model. We can see that the model does mispredicted. This project is only for learning. So, creating the most accurate model, which requires a lot of tuning and training, is not our priority.
