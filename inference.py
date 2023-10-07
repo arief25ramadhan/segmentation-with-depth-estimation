@@ -14,15 +14,6 @@ img = np.array(Image.open(img_path))
 gt_segm = np.array(Image.open('dataset/nyud/masks/000005.png'))
 gt_depth = np.array(Image.open('dataset/nyud/depth/000005.png'))
 
-def prepare_img(img):
-    return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
-
-def depth_to_rgb(depth):
-    normalizer = co.Normalize(vmin=0, vmax=8)
-    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
-    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
-    return colormapped_im
-
 # Pre-processing and post-processing constants #
 CMAP = np.load('dataset/cmap_nyud.npy')
 DEPTH_COEFF = 5000. # to convert into metres
@@ -44,6 +35,15 @@ hydranet = nn.DataParallel(nn.Sequential(encoder, decoder).cuda()) # Use .cpu() 
 model_path = "checkpoint.pth.tar"
 checkpoint = torch.load(model_path)
 hydranet.load_state_dict(checkpoint['state_dict'])
+
+def prepare_img(img):
+    return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
+
+def depth_to_rgb(depth):
+    normalizer = co.Normalize(vmin=0, vmax=8)
+    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
+    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
+    return colormapped_im
 
 with torch.no_grad():
     img_var = Variable(torch.from_numpy(prepare_img(img).transpose(2, 0, 1)[None]), requires_grad=False).float()
