@@ -12,6 +12,12 @@ import matplotlib.cm as cm
 def prepare_img(img):
     return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
 
+def depth_to_rgb(depth):
+    normalizer = co.Normalize(vmin=0, vmax=8)
+    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
+    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
+    return colormapped_im
+
 # Pre-processing and post-processing constants #
 CMAP = np.load('dataset/cmap_nyud.npy')
 DEPTH_COEFF = 5000. # to convert into metres
@@ -50,13 +56,6 @@ def inference(img):
         depth = np.abs(depth)
 
     return segm, depth
-
-
-def depth_to_rgb(depth):
-    normalizer = co.Normalize(vmin=0, vmax=8)
-    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
-    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
-    return colormapped_im
 
 result_video = []
 video_capture = cv2.VideoCapture('media/kitti_07.mp4')

@@ -17,6 +17,12 @@ gt_depth = np.array(Image.open('dataset/nyud/depth/000005.png'))
 def prepare_img(img):
     return (img * IMG_SCALE - IMG_MEAN) / IMG_STD
 
+def depth_to_rgb(depth):
+    normalizer = co.Normalize(vmin=0, vmax=8)
+    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
+    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
+    return colormapped_im
+
 # Pre-processing and post-processing constants #
 CMAP = np.load('dataset/cmap_nyud.npy')
 DEPTH_COEFF = 5000. # to convert into metres
@@ -52,12 +58,6 @@ with torch.no_grad():
                        interpolation=cv2.INTER_CUBIC)
     segm = CMAP[segm.argmax(axis=2) + 1].astype(np.uint8)
     depth = np.abs(depth)
-
-def depth_to_rgb(depth):
-    normalizer = co.Normalize(vmin=0, vmax=8)
-    mapper = cm.ScalarMappable(norm=normalizer, cmap='plasma')
-    colormapped_im = (mapper.to_rgba(depth)[:, :, :3] * 255).astype(np.uint8)
-    return colormapped_im
 
 depth = depth_to_rgb(depth)
 depth = cv2.cvtColor(depth, cv2.COLOR_RGB2BGR)
